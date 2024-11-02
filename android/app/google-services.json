@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "536327249347",
+    "project_id": "cakra-temp",
+    "storage_bucket": "cakra-temp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:536327249347:android:620d8485a778fd84737176",
+        "android_client_info": {
+          "package_name": "com.example.chakracabs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQqsp0zYScI67d3-HApA9jrKwCNix3OOA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
