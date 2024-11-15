@@ -1,8 +1,10 @@
+import 'package:chakracabs/models/place_model.dart';
 import 'package:chakracabs/view_models/bottom_sheet_model.dart';
 import 'package:chakracabs/view_models/ride_provider.dart';
 import 'package:chakracabs/views/helper.dart';
 import 'package:chakracabs/views/home_screen/utils/bottom_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:google_places_flutter/model/prediction.dart';
@@ -85,23 +87,48 @@ class _HomeScreenState extends State<HomeScreen> {
     final position = await _determinePosition();
     if (position != null) {
       final latLng = LatLng(position.latitude, position.longitude);
-      Provider.of<LocationViewModel>(context, listen: false)
-          .updateCurrentPosition(latLng);
-      Provider.of<RideProvider>(context, listen: false).pickup = latLng;
-      // Add user's location marker with custom icon
-      setState(() {
-        _markers.add(
-          Marker(
-            markerId: const MarkerId('userLocation'),
-            position: latLng,
-            icon: _userLocationIcon ?? BitmapDescriptor.defaultMarker,
-            infoWindow: const InfoWindow(title: 'Your Location'),
-          ),
-        );
-      });
 
-      // Move the camera to the user's location
-      _mapController?.animateCamera(CameraUpdate.newLatLng(latLng));
+      // Reverse geocode to get the address as a string
+      try {
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+            position.latitude, position.longitude);
+
+        // Check if placemarks are available
+        if (placemarks.isNotEmpty) {
+          String address =
+              "${placemarks.first.name}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea}, ${placemarks.first.country}";
+
+          // Update the RideProvider's pickup with the obtained location details
+          Provider.of<RideProvider>(context, listen: false).pickup = Place(
+            address: address,
+            name: placemarks.first.name ?? "Your Location",
+            lat: position.latitude,
+            lng: position.longitude,
+          );
+
+          // Add user's location marker with custom icon
+          setState(() {
+            _markers.add(
+              Marker(
+                markerId: const MarkerId('userLocation'),
+                position: latLng,
+                icon: _userLocationIcon ?? BitmapDescriptor.defaultMarker,
+                infoWindow: InfoWindow(title: address),
+              ),
+            );
+          });
+
+          // Move the camera to the user's location
+          _mapController?.animateCamera(CameraUpdate.newLatLng(latLng));
+        } else {
+          // If placemarks list is empty, show a fallback message
+          showSnackbar("Unable to retrieve address, please try again.",
+              Colors.red, context);
+        }
+      } catch (e) {
+        print("Failed to get address: $e");
+        showSnackbar("Failed to get address", Colors.red, context);
+      }
     }
   }
 
@@ -134,6 +161,34 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 },
               ),
+              Provider.of<BottomSheetModel>(context).selectedIndex != 0
+                  ? Positioned(
+                      top: 8,
+                      left: 8,
+                      child: InkWell(
+                        onTap: () {
+                          Provider.of<BottomSheetModel>(context, listen: false)
+                              .selectedIndex = Provider.of<BottomSheetModel>(
+                                      context,
+                                      listen: false)
+                                  .selectedIndex -
+                              1;
+                        },
+                        child: Container(
+                          height: 40,
+                          width: 40,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                          child: Icon(
+                            Icons.arrow_back,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    )
+                  : SizedBox.shrink(),
               Provider.of<BottomSheetModel>(context).selectedIndex == 0
                   ? Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -201,7 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     googleAPIKey: 'AIzaSyDlhLBOy0MZ10uITSTClB0SMneFG5Glrcg',
                     textEditingController: _textEditingController,
                     inputDecoration: InputDecoration(
-                      hintText: 'Enter Location',
+                      hintText: 'Enter Destination',
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
@@ -213,25 +268,38 @@ class _HomeScreenState extends State<HomeScreen> {
                     debounceTime: 600,
                     isLatLngRequired: true,
                     getPlaceDetailWithLatLng: (postalCodeResponse) {
-                      print(
-                          'this is the postal code response: ${postalCodeResponse.lat}');
-                      final lat = double.tryParse(postalCodeResponse.lat!);
-                      final lng = double.tryParse(postalCodeResponse.lng!);
-                      if (lat != null && lng != null) {
-                        final latLng = LatLng(lat, lng);
+                      try {
+                        print(
+                            'this is the postal code response: ${postalCodeResponse.structuredFormatting!.mainText}');
+                        final lat = double.tryParse(postalCodeResponse.lat!);
+                        final lng = double.tryParse(postalCodeResponse.lng!);
+                        if (lat != null && lng != null) {
+                          final latLng = LatLng(lat, lng);
 
-                        // Update location and animate the map to the new location
+                          // Update location and animate the map to the new location
 
-                        Provider.of<RideProvider>(context, listen: false).dest =
-                            latLng;
-                        Provider.of<LocationViewModel>(context, listen: false)
-                            .updateCurrentPosition(latLng);
+                          Provider.of<RideProvider>(context,
+                                      listen: false)
+                                  .dest =
+                              Place(
+                                  address: postalCodeResponse.description!,
+                                  name:
+                                      '${postalCodeResponse.structuredFormatting!.mainText}',
+                                  lat: lat,
+                                  lng: lng);
+                          Provider.of<LocationViewModel>(context, listen: false)
+                              .updateCurrentPosition(latLng);
 
-                        _mapController
-                            ?.animateCamera(CameraUpdate.newLatLng(latLng));
-
-                        Navigator.pop(
-                            ctx); // Close the dialog after successful selection
+                          _mapController
+                              ?.animateCamera(CameraUpdate.newLatLng(latLng));
+                          Provider.of<BottomSheetModel>(context, listen: false)
+                              .selectedIndex = 1;
+                          Navigator.pop(
+                              ctx); // Close the dialog after successful selection
+                        }
+                      } catch (e) {
+                        print(e);
+                        showSnackbar('$e', Colors.red, context);
                       }
                     },
                     itemClick: (Prediction? prediction) async {

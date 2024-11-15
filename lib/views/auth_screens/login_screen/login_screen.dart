@@ -225,6 +225,8 @@ class _LoginScreenState extends State<LoginScreen> {
       timeout: const Duration(seconds: 60),
       verificationCompleted: (PhoneAuthCredential credential) async {
         await _auth.signInWithCredential(credential);
+        // Fetch user details from Firestore
+        await fetchUserDetails(fullPhoneNumber, context);
         showSnackbar("User logged in successfully!", Colors.green, context);
         Navigator.pushReplacement(
           context,
@@ -257,6 +259,40 @@ class _LoginScreenState extends State<LoginScreen> {
         showSnackbar("Code auto retrieval timed out", Colors.orange, context);
       },
     );
+  }
+
+  Future<void> fetchUserDetails(
+      String fullPhoneNumber, BuildContext context) async {
+    print('hiiii');
+    try {
+      // Query Firestore for the user details
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('fullPhoneNumber', isEqualTo: fullPhoneNumber)
+          .get();
+      print('hiiiiiiiii');
+      if (querySnapshot.docs.isNotEmpty) {
+        // User found, navigate to HomeScreen with user data
+        var userData = querySnapshot.docs[0].data();
+
+        print(userData);
+
+        showSnackbar("User logged in successfully!", Colors.green, context);
+
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => HomeScreen(
+        //       userData: userData, // Pass user data to the HomeScreen
+        //     ),
+        //   ),
+        // );
+      } else {
+        showSnackbar("User data not found.", Colors.red, context);
+      }
+    } catch (e) {
+      showSnackbar("Error fetching user details: $e", Colors.red, context);
+    }
   }
 
   void openSignupBottomSheet() {

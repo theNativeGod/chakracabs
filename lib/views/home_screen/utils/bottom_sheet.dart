@@ -1,4 +1,6 @@
+import 'package:chakracabs/models/place_model.dart';
 import 'package:chakracabs/view_models/bottom_sheet_model.dart';
+import 'package:chakracabs/view_models/ride_provider.dart';
 import 'package:chakracabs/views/helper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -176,277 +178,166 @@ class RideType extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var rideProvider = Provider.of<RideProvider>(context);
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          _buildRideTypeSection(
+            context: context,
+            title: 'Economy',
+            rideOptions: [
+              {'type': 'Mini', 'price': '₹199', 'capacity': '3 seats capacity'},
+              {
+                'type': 'Sedan',
+                'price': '₹229',
+                'capacity': '3 seats capacity'
+              },
+            ],
+            rideProvider: rideProvider,
+          ),
+          _buildRideTypeSection(
+            context: context,
+            title: 'Premium',
+            rideOptions: [
+              {
+                'type': 'Premium',
+                'price': '₹299',
+                'capacity': '3 seats capacity'
+              },
+              {
+                'type': 'Premium Suv',
+                'price': '₹329',
+                'capacity': '3 seats capacity'
+              },
+            ],
+            rideProvider: rideProvider,
+          ),
+          const SizedBox(height: 16),
+          BookRide(rideProvider: rideProvider),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRideTypeSection({
+    required BuildContext context,
+    required String title,
+    required List<Map<String, String>> rideOptions,
+    required RideProvider rideProvider,
+  }) {
     return Column(
       children: [
+        Row(
+          children: [
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ],
+        ),
         Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Text(
-                    'Economy',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      width: (width - 28) / 2,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Colors.white,
-                      ),
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text('5 min away'),
-                          const Divider(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Mini',
-                                  style: Theme.of(context).textTheme.bodyLarge),
-                              Text(
-                                '₹199',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge!
-                                    .copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              )
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                '3 seats capacity',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                    Container(
-                      width: (width - 28) / 2,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Colors.white,
-                      ),
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text('5 min away'),
-                          Divider(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Sedan',
-                                  style: Theme.of(context).textTheme.bodyLarge),
-                              Text(
-                                '229',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge!
-                                    .copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              )
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                '3 seats capacity',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Text(
-                    'Premium',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      width: (width - 28) / 2,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Colors.white,
-                      ),
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text('5 min away'),
-                          Divider(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Premium',
-                                  style: Theme.of(context).textTheme.bodyLarge),
-                              Text(
-                                '299',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge!
-                                    .copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              )
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                '3 seats capacity',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                    Container(
-                      width: (width - 28) / 2,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Colors.white,
-                      ),
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text('5 min away'),
-                          const Divider(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Premium Suv',
-                                  style: Theme.of(context).textTheme.bodyLarge),
-                              Text(
-                                '₹329',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge!
-                                    .copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              )
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                '3 seats capacity',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                width: width - 16,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.all(8),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.sell,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                    const SizedBox(width: 8),
-                    Text('Promocode',
-                        style: Theme.of(context).textTheme.bodyLarge),
-                    const Spacer(),
-                    const Icon(Icons.keyboard_arrow_down)
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
-        ),
-        Divider(
-          color: Theme.of(context).primaryColor,
-          thickness: .5,
-        ),
-        const SizedBox(height: 16),
-        Container(
-          width: width - 16,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.only(top: 8.0),
           child: Row(
-            children: [
-              Icon(
-                Icons.payment,
-                color: Theme.of(context).primaryColor,
-              ),
-              const SizedBox(width: 8),
-              Column(
-                children: [
-                  Text('lalit@icici',
-                      style: Theme.of(context).textTheme.bodyLarge),
-                  Text(
-                    'Lalit Nikrani',
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                          color: Colors.grey,
-                        ),
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: rideOptions.map((rideOption) {
+              String type = rideOption['type']!;
+              String price = rideOption['price']!;
+              String capacity = rideOption['capacity']!;
+
+              bool isSelected = rideProvider.rideType == type;
+
+              return GestureDetector(
+                onTap: () => rideProvider.rideType = type,
+                child: Container(
+                  width: (width - 28) / 2,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: Colors.white,
+                    border: Border.all(
+                      color: isSelected
+                          ? Theme.of(context).primaryColor
+                          : Colors.transparent,
+                      width: 2,
+                    ),
                   ),
-                ],
-              ),
-              const Spacer(),
-              const Icon(Icons.keyboard_arrow_down)
-            ],
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.all(8),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('5 min away'),
+                      const Divider(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            type,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          Text(
+                            price,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyLarge!
+                                .copyWith(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            capacity,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
           ),
         ),
         const SizedBox(height: 8),
-        FullPrimaryButton(
-          text: 'Book A Ride',
-          ontap: () {
-            Provider.of<BottomSheetModel>(context, listen: false)
-                .selectedIndex = 2;
-          },
-        ),
       ],
     );
+  }
+}
+
+class BookRide extends StatefulWidget {
+  const BookRide({
+    super.key,
+    required this.rideProvider,
+  });
+
+  final RideProvider rideProvider;
+
+  @override
+  State<BookRide> createState() => _BookRideState();
+}
+
+class _BookRideState extends State<BookRide> {
+  bool isLoading = false;
+  @override
+  Widget build(BuildContext context) {
+    return isLoading
+        ? const Center(
+            child: CircularProgressIndicator(),
+          )
+        : FullPrimaryButton(
+            text: 'Book A Ride',
+            ontap: () async {
+              isLoading = true;
+              setState(() {});
+              await widget.rideProvider.bookRide(context);
+              isLoading = false;
+              setState(() {});
+              Provider.of<BottomSheetModel>(context, listen: false)
+                  .selectedIndex = 2;
+            },
+          );
   }
 }
 
@@ -460,6 +351,9 @@ class RideDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var rideProvider = Provider.of<RideProvider>(context);
+    Place? pickup = rideProvider.pickup;
+    Place? dest = rideProvider.dest;
     return Column(
       children: [
         Container(
@@ -469,6 +363,7 @@ class RideDetails extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.all(8),
+          alignment: Alignment.center,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -479,8 +374,12 @@ class RideDetails extends StatelessWidget {
                     color: Theme.of(context).primaryColor,
                   ),
                   const SizedBox(width: 8),
-                  Text('Stesalit Tower, E-2-3, GP B...',
-                      style: Theme.of(context).textTheme.bodyLarge),
+                  Expanded(
+                    child: Text(pickup!.address,
+                        softWrap: true,
+                        overflow: TextOverflow.clip,
+                        style: Theme.of(context).textTheme.bodyLarge),
+                  ),
                 ],
               ),
               const Padding(
@@ -494,64 +393,66 @@ class RideDetails extends StatelessWidget {
                     color: Theme.of(context).primaryColor,
                   ),
                   const SizedBox(width: 8),
-                  Text('Sector 1, 1858/1, Rajdanga...',
-                      style: Theme.of(context).textTheme.bodyLarge),
+                  Expanded(
+                    child: Text(dest!.address,
+                        style: Theme.of(context).textTheme.bodyLarge),
+                  ),
                 ],
               ),
             ],
           ),
         ),
         const SizedBox(height: 8),
-        Container(
-          width: width - 16,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            children: [
-              Icon(
-                Icons.access_time_filled,
-                color: Theme.of(context).primaryColor,
-              ),
-              const SizedBox(width: 8),
-              Text('Now', style: Theme.of(context).textTheme.bodyLarge),
-              const Spacer(),
-              const Icon(Icons.keyboard_arrow_down)
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          width: width - 16,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            children: [
-              Icon(
-                Icons.directions_car,
-                color: Theme.of(context).primaryColor,
-              ),
-              const SizedBox(width: 8),
-              Text('Sector V', style: Theme.of(context).textTheme.bodyLarge),
-              const SizedBox(width: 8),
-              Text(
-                '(19 Cars)',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleSmall!
-                    .copyWith(color: Colors.grey.shade500),
-              ),
-              const Spacer(),
-              const Icon(Icons.keyboard_arrow_down)
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
+        // Container(
+        //   width: width - 16,
+        //   decoration: BoxDecoration(
+        //     color: Colors.white,
+        //     borderRadius: BorderRadius.circular(12),
+        //   ),
+        //   padding: const EdgeInsets.all(8),
+        //   child: Row(
+        //     children: [
+        //       Icon(
+        //         Icons.access_time_filled,
+        //         color: Theme.of(context).primaryColor,
+        //       ),
+        //       const SizedBox(width: 8),
+        //       Text('Now', style: Theme.of(context).textTheme.bodyLarge),
+        //       const Spacer(),
+        //       const Icon(Icons.keyboard_arrow_down)
+        //     ],
+        //   ),
+        // ),
+        // const SizedBox(height: 8),
+        // Container(
+        //   width: width - 16,
+        //   decoration: BoxDecoration(
+        //     color: Colors.white,
+        //     borderRadius: BorderRadius.circular(12),
+        //   ),
+        //   padding: const EdgeInsets.all(8),
+        //   child: Row(
+        //     children: [
+        //       Icon(
+        //         Icons.directions_car,
+        //         color: Theme.of(context).primaryColor,
+        //       ),
+        //       const SizedBox(width: 8),
+        //       Text('Sector V', style: Theme.of(context).textTheme.bodyLarge),
+        //       const SizedBox(width: 8),
+        //       Text(
+        //         '(19 Cars)',
+        //         style: Theme.of(context)
+        //             .textTheme
+        //             .titleSmall!
+        //             .copyWith(color: Colors.grey.shade500),
+        //       ),
+        //       const Spacer(),
+        //       const Icon(Icons.keyboard_arrow_down)
+        //     ],
+        //   ),
+        // ),
+        // const SizedBox(height: 8),
       ],
     );
   }

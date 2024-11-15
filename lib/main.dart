@@ -1,5 +1,6 @@
 import 'package:chakracabs/view_models/bottom_sheet_model.dart';
 import 'package:chakracabs/view_models/location_view_model.dart';
+import 'package:chakracabs/view_models/profile_provider.dart';
 import 'package:chakracabs/view_models/ride_provider.dart';
 import 'package:chakracabs/views/auth_screens/login_screen/login_screen.dart';
 import 'package:chakracabs/views/home_screen/home_screen.dart';
@@ -37,6 +38,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (ctx) => RideProvider(),
         ),
+        ChangeNotifierProvider(
+          create: (ctx) => ProfileProvider(),
+        ),
       ],
       child: MaterialApp(
         title: 'Chakra Cabs',
@@ -45,7 +49,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff94341a)),
           useMaterial3: true,
         ),
-        home: HomeScreen(),
+        home: SplashScreen(),
       ),
     );
   }
