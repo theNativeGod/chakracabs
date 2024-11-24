@@ -21,15 +21,15 @@ class Bottom1 extends StatelessWidget {
         // nearest cab hubs
         NearestCabHubs(height: height, width: width),
         // button
-        FullPrimaryButton(
-          text: 'Choose Your Destination',
-          ontap: () {
-            Provider.of<BottomSheetModel>(context, listen: false)
-                .bottomSheetHeight = 300.0;
-            Provider.of<BottomSheetModel>(context, listen: false)
-                .selectedIndex = 1;
-          },
-        ),
+        // FullPrimaryButton(
+        //   text: 'Choose Your Destination',
+        //   ontap: () {
+        //     Provider.of<BottomSheetModel>(context, listen: false)
+        //         .bottomSheetHeight = 300.0;
+        //     Provider.of<BottomSheetModel>(context, listen: false)
+        //         .selectedIndex = 1;
+        //   },
+        // ),
         // offers
         OfferAd(width: width),
         Padding(

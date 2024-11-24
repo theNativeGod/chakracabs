@@ -1,11 +1,13 @@
 import 'dart:async';
-import 'package:chakracabs/views/helper.dart';
-import 'package:chakracabs/views/home_screen/home_screen.dart';
+import 'package:chakracabs/models/customer.dart';
+import 'package:chakracabs/views/main_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:new_pinput/new_pinput.dart';
+import 'package:provider/provider.dart';
 
-import '../../widgets/export.dart';
+import '../../../view_models/profile_provider.dart';
 
 class PhoneVerifyScreen extends StatefulWidget {
   const PhoneVerifyScreen({
@@ -65,6 +67,7 @@ class _PhoneVerifyScreenState extends State<PhoneVerifyScreen> {
     }
 
     try {
+      // Verify the OTP
       PhoneAuthCredential credential = PhoneAuthProvider.credential(
         verificationId: _verificationId,
         smsCode: otp,
@@ -72,13 +75,55 @@ class _PhoneVerifyScreenState extends State<PhoneVerifyScreen> {
 
       await _auth.signInWithCredential(credential);
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
+      // Fetch user details from Firestore and update ProfileProvider
+      await getCustomerDetailsAndSetProfile(widget.phoneNumber);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Invalid OTP. Please try again.")),
+      );
+    }
+  }
+
+  Future<void> getCustomerDetailsAndSetProfile(String phoneNumber) async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('fullPhoneNumber', isEqualTo: phoneNumber)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        final data = snapshot.docs.first.data();
+        final customer = CustomerModel(
+          uid: snapshot.docs.first.id,
+          firstName: data['firstName'] ?? '',
+          lastName: data['lastName'] ?? '',
+          phoneNumber: data['fullPhoneNumber'] ?? '',
+          email: data['email'] ?? '',
+        );
+
+        // Update ProfileProvider
+        final profileProvider =
+            Provider.of<ProfileProvider>(context, listen: false);
+        profileProvider.customer = customer;
+
+        // Navigate to MainScreen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const MainScreen(),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text("No user found with this phone number.${phoneNumber}")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to fetch user details: $e")),
       );
     }
   }
@@ -90,10 +135,7 @@ class _PhoneVerifyScreenState extends State<PhoneVerifyScreen> {
           phoneNumber: widget.phoneNumber,
           verificationCompleted: (PhoneAuthCredential credential) async {
             await _auth.signInWithCredential(credential);
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
-            );
+            await getCustomerDetailsAndSetProfile(widget.phoneNumber);
           },
           verificationFailed: (FirebaseAuthException e) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -141,14 +183,27 @@ class _PhoneVerifyScreenState extends State<PhoneVerifyScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const HeadingText(text: 'Phone Verification'),
+                      const Text(
+                        'Phone Verification',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       SizedBox(height: height * .06),
-                      const AuthPurposeText(text: 'Enter Your OTP code'),
+                      const Text(
+                        'Enter Your OTP code',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
                       const SizedBox(height: 24),
-                      Otpinput(controller: _otpController),
+                      OtpInput(controller: _otpController),
                       SizedBox(height: height * .07),
-                      AuthButton(
-                        onTap: verifyOtp,
+                      ElevatedButton(
+                        onPressed: verifyOtp,
+                        child: const Text('Verify OTP'),
                       ),
                       SizedBox(height: height * .08),
                       Text(
@@ -161,7 +216,7 @@ class _PhoneVerifyScreenState extends State<PhoneVerifyScreen> {
                         child: Row(
                           children: [
                             Text(
-                              'Resend code'.toUpperCase(),
+                              'RESEND CODE',
                               style: Theme.of(context)
                                   .textTheme
                                   .bodyMedium!
@@ -180,11 +235,6 @@ class _PhoneVerifyScreenState extends State<PhoneVerifyScreen> {
                                     .textTheme
                                     .bodySmall!
                                     .copyWith(color: Colors.grey),
-                              ),
-                            if (_isResendAllowed)
-                              const Icon(
-                                Icons.play_arrow,
-                                size: 12,
                               ),
                           ],
                         ),
@@ -214,10 +264,10 @@ class _PhoneVerifyScreenState extends State<PhoneVerifyScreen> {
   }
 }
 
-class Otpinput extends StatelessWidget {
+class OtpInput extends StatelessWidget {
   final TextEditingController controller;
 
-  const Otpinput({
+  const OtpInput({
     super.key,
     required this.controller,
   });

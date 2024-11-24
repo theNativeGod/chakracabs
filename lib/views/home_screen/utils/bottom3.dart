@@ -40,22 +40,23 @@ class Bottom3 extends StatelessWidget {
 
             // Update the UI based on the status
             if (status == 'confirmed') {
-              return Column(
-                children: [
-                  Text(
-                    'Driver Found!',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Arriving shortly',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(color: Colors.green),
-                  ),
-                ],
-              );
+              // return Column(
+              //   children: [
+              //     Text(
+              //       'Driver Found!',
+              //       style: Theme.of(context).textTheme.titleLarge,
+              //     ),
+              //     const SizedBox(height: 8),
+              //     Text(
+              //       'Arriving shortly',
+              //       style: Theme.of(context)
+              //           .textTheme
+              //           .titleMedium!
+              //           .copyWith(color: Colors.green),
+              //     ),
+              //   ],
+              // );
+              return Bottom4(width: width);
             } else {
               return Column(
                 children: [

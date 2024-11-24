@@ -1,15 +1,19 @@
+import 'dart:convert';
+
 import 'package:chakracabs/models/place_model.dart';
 import 'package:chakracabs/view_models/bottom_sheet_model.dart';
 import 'package:chakracabs/view_models/ride_provider.dart';
 import 'package:chakracabs/views/helper.dart';
 import 'package:chakracabs/views/home_screen/utils/bottom_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:google_places_flutter/model/prediction.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 
 import '../../view_models/location_view_model.dart';
 
@@ -23,6 +27,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   GoogleMapController? _mapController;
   final Set<Marker> _markers = {};
+  final Set<Polyline> _polylines = {};
   BitmapDescriptor? _userLocationIcon;
   BitmapDescriptor? _cabHubIcon;
   late TextEditingController _textEditingController;
@@ -157,6 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         _mapController = controller;
                       },
                       markers: _markers,
+                      polylines: _polylines,
                     ),
                   );
                 },
@@ -181,14 +187,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             shape: BoxShape.circle,
                             color: Theme.of(context).primaryColor,
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.arrow_back,
                             color: Colors.white,
                           ),
                         ),
                       ),
                     )
-                  : SizedBox.shrink(),
+                  : const SizedBox.shrink(),
               Provider.of<BottomSheetModel>(context).selectedIndex == 0
                   ? Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -235,6 +241,39 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<List<LatLng>> getRoadDirections(
+      LatLng origin, LatLng destination) async {
+    const String apiKey =
+        "AIzaSyDlhLBOy0MZ10uITSTClB0SMneFG5Glrcg"; // Replace with your API key
+    final String url =
+        "https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&key=$apiKey";
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        print("Directions API Response: ${response.body}");
+
+        final points = json['routes'][0]['overview_polyline']['points'];
+
+        // Decode the polyline points
+        PolylinePoints polylinePoints = PolylinePoints();
+        final result = polylinePoints.decodePolyline(points);
+
+        // Convert to LatLng
+        return result
+            .map((point) => LatLng(point.latitude, point.longitude))
+            .toList();
+      } else {
+        throw Exception("Failed to fetch directions");
+      }
+    } catch (e) {
+      print("Error fetching directions: $e");
+
+      return [];
+    }
+  }
+
   void showGooglePlacesAutocomplete(BuildContext context) {
     showDialog(
       context: context,
@@ -267,7 +306,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     debounceTime: 600,
                     isLatLngRequired: true,
-                    getPlaceDetailWithLatLng: (postalCodeResponse) {
+                    getPlaceDetailWithLatLng: (postalCodeResponse) async {
                       try {
                         print(
                             'this is the postal code response: ${postalCodeResponse.structuredFormatting!.mainText}');
@@ -289,6 +328,53 @@ class _HomeScreenState extends State<HomeScreen> {
                                   lng: lng);
                           Provider.of<LocationViewModel>(context, listen: false)
                               .updateCurrentPosition(latLng);
+                          setState(() {
+                            _markers.add(
+                              Marker(
+                                markerId: const MarkerId('destination'),
+                                position: latLng,
+                                infoWindow: InfoWindow(
+                                    title: postalCodeResponse.description!),
+                                icon: BitmapDescriptor.defaultMarkerWithHue(
+                                    BitmapDescriptor.hueBlue),
+                              ),
+                            );
+                          });
+
+                          // Add polyline between pickup and destination
+                          final pickupLatLng =
+                              Provider.of<RideProvider>(context, listen: false)
+                                          .pickup !=
+                                      null
+                                  ? LatLng(
+                                      Provider.of<RideProvider>(context,
+                                              listen: false)
+                                          .pickup!
+                                          .lat,
+                                      Provider.of<RideProvider>(context,
+                                              listen: false)
+                                          .pickup!
+                                          .lng,
+                                    )
+                                  : null;
+
+                          if (pickupLatLng != null) {
+                            final routePoints =
+                                await getRoadDirections(pickupLatLng, latLng);
+
+                            print('routepoints: $routePoints');
+
+                            setState(() {
+                              _polylines.add(
+                                Polyline(
+                                  polylineId: const PolylineId('route'),
+                                  points: routePoints,
+                                  color: Colors.blue,
+                                  width: 5,
+                                ),
+                              );
+                            });
+                          }
 
                           _mapController
                               ?.animateCamera(CameraUpdate.newLatLng(latLng));

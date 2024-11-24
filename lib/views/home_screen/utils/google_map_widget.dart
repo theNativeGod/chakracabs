@@ -1,39 +1,70 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 
-class GoogleMapWidget extends StatefulWidget {
-  final LatLng initialPosition;
+import '../../../view_models/map_view_model.dart';
 
-  const GoogleMapWidget({super.key, required this.initialPosition});
-
-  @override
-  _GoogleMapWidgetState createState() => _GoogleMapWidgetState();
-}
-
-class _GoogleMapWidgetState extends State<GoogleMapWidget> {
-  GoogleMapController? mapController;
-
-  @override
-  void initState() {
-    super.initState();
-    // Optionally load markers or any setup needed
-  }
+class MapScreen extends StatelessWidget {
+  const MapScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return GoogleMap(
-      mapType: MapType.normal,
-      onMapCreated: (GoogleMapController controller) {
-        mapController = controller;
-        // Move the camera to the initial position
-        mapController?.animateCamera(
-            CameraUpdate.newLatLngZoom(widget.initialPosition, 15));
-      },
-      initialCameraPosition: CameraPosition(
-        target: widget.initialPosition,
-        zoom: 10,
+    final mapViewModel = Provider.of<MapViewModel>(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Cab Route'),
       ),
-      markers: {/* Your markers logic */},
+      body: Stack(
+        children: [
+          GoogleMap(
+            initialCameraPosition: const CameraPosition(
+              target: LatLng(22.57, 88.36),
+              zoom: 12,
+            ),
+            onMapCreated: (controller) {
+              mapViewModel.setMapController(controller);
+            },
+            polylines: mapViewModel.polylines,
+            myLocationEnabled: true,
+            myLocationButtonEnabled: true,
+            zoomControlsEnabled: false,
+          ),
+          Positioned(
+            bottom: 20,
+            left: 20,
+            right: 20,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 8,
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Distance: ${mapViewModel.distance}',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Duration: ${mapViewModel.duration}',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

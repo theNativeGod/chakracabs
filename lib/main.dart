@@ -5,6 +5,7 @@ import 'package:chakracabs/view_models/ride_provider.dart';
 import 'package:chakracabs/views/auth_screens/login_screen/login_screen.dart';
 import 'package:chakracabs/views/home_screen/home_screen.dart';
 import 'package:chakracabs/views/home_screen/utils/google_map_widget.dart';
+import 'package:chakracabs/views/main_screen.dart';
 import 'package:chakracabs/views/payment_choices/payment_choices_screen.dart';
 import 'package:chakracabs/views/rate_your_driver/rate_your_driver.dart';
 import 'package:chakracabs/views/splash_screen/splash_screen.dart';
@@ -49,7 +50,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff94341a)),
           useMaterial3: true,
         ),
-        home: SplashScreen(),
+        home: HomeScreen(),
       ),
     );
   }

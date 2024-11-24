@@ -270,7 +270,7 @@ class _LoginScreenState extends State<LoginScreen> {
           .collection('users')
           .where('fullPhoneNumber', isEqualTo: fullPhoneNumber)
           .get();
-      print('hiiiiiiiii');
+  
       if (querySnapshot.docs.isNotEmpty) {
         // User found, navigate to HomeScreen with user data
         var userData = querySnapshot.docs[0].data();
