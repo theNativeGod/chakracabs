@@ -101,6 +101,7 @@ class TripDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var rideProvider = Provider.of<RideProvider>(context);
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
@@ -123,7 +124,7 @@ class TripDetails extends StatelessWidget {
             children: [
               Icon(Icons.location_pin, color: Theme.of(context).primaryColor),
               Text(
-                'Sector 1, 1858/1, Rajdanga...',
+                rideProvider.dest!.name,
                 style: Theme.of(context)
                     .textTheme
                     .titleLarge!
@@ -354,6 +355,8 @@ class RideDetails extends StatelessWidget {
     var rideProvider = Provider.of<RideProvider>(context);
     Place? pickup = rideProvider.pickup;
     Place? dest = rideProvider.dest;
+    print('pickup ${pickup!.name}');
+    print('dest: ${dest!.name}');
     return Column(
       children: [
         Container(

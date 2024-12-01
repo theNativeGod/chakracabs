@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:chakracabs/models/place_model.dart';
@@ -31,18 +32,75 @@ class _HomeScreenState extends State<HomeScreen> {
   BitmapDescriptor? _userLocationIcon;
   BitmapDescriptor? _cabHubIcon;
   late TextEditingController _textEditingController;
+  StreamSubscription<Position>? _locationSubscription;
 
   @override
   void initState() {
     super.initState();
+    curLoc();
     _loadCustomMarkers();
     _textEditingController = TextEditingController();
+
+    _startLocationUpdates(); // Start location updates
+
+    Future.delayed(const Duration(seconds: 3)).then((value) => setState(() {}));
   }
 
   @override
   void dispose() {
+    _locationSubscription
+        ?.cancel(); // Cancel location subscription when not in use
     _textEditingController.dispose(); // Dispose to free resources
     super.dispose();
+  }
+
+  curLoc() async {
+    final position = await _determinePosition();
+    if (position != null) {
+      final latLng = LatLng(position.latitude, position.longitude);
+      // print('latlng: $latLng');
+      Provider.of<LocationViewModel>(context, listen: false)
+          .updateCurrentPosition(latLng);
+      // await getAddressFromLatLng(latLng);
+
+      // Provider.of<RideProvider>(context, listen: false).pickup =
+      _mapController?.animateCamera(
+        CameraUpdate.newLatLng(latLng),
+      );
+    }
+  }
+
+  Future<void> getAddressFromLatLng(LatLng latLng) async {
+    const String apiKey = 'AIzaSyDlhLBOy0MZ10uITSTClB0SMneFG5Glrcg';
+    final url =
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${latLng.latitude},${latLng.longitude}&key=$apiKey';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('Geocoding API Response: $data');
+
+        if (data['results'] != null && data['results'].isNotEmpty) {
+          final address = data['results'][0]['formatted_address'];
+          print('Address: $address');
+
+          Provider.of<RideProvider>(context, listen: false).pickup = Place(
+            address: address,
+            name: address,
+            lat: latLng.latitude,
+            lng: latLng.longitude,
+          );
+        } else {
+          print('No address found for the given location.');
+        }
+      } else {
+        print('Failed to fetch address: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching address: $e');
+    }
   }
 
   Future<void> _loadCustomMarkers() async {
@@ -59,8 +117,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Initialize cab hub markers after icons are loaded
     _initializeCabHubMarkers();
-    // Move map to user's current location
-    _moveToUserLocation();
   }
 
   void _initializeCabHubMarkers() {
@@ -85,55 +141,64 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     });
+
+    setState(() {});
   }
 
-  Future<void> _moveToUserLocation() async {
-    // Get user's current location
-    final position = await _determinePosition();
-    if (position != null) {
-      final latLng = LatLng(position.latitude, position.longitude);
+  void _startLocationUpdates() async {
+    // Listen to location changes and update the map
+    _locationSubscription = Geolocator.getPositionStream(
+            // desiredAccuracy: LocationAccuracy.high,
+            // distanceFilter: 10, // Update location every 10 meters
+            )
+        .listen((Position position) {
+      _updateUserLocation(position);
+      getAddressFromLatLng(LatLng(position.latitude, position.longitude));
+    });
+  }
 
-      // Reverse geocode to get the address as a string
-      try {
-        List<Placemark> placemarks = await placemarkFromCoordinates(
-            position.latitude, position.longitude);
+  Future<void> _updateUserLocation(Position position) async {
+    final latLng = LatLng(position.latitude, position.longitude);
 
-        // Check if placemarks are available
-        if (placemarks.isNotEmpty) {
-          String address =
-              "${placemarks.first.name}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea}, ${placemarks.first.country}";
+    // Reverse geocode to get the address as a string
+    try {
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(position.latitude, position.longitude);
 
-          // Update the RideProvider's pickup with the obtained location details
-          Provider.of<RideProvider>(context, listen: false).pickup = Place(
-            address: address,
-            name: placemarks.first.name ?? "Your Location",
-            lat: position.latitude,
-            lng: position.longitude,
+      // Check if placemarks are available
+      if (placemarks.isNotEmpty) {
+        String address =
+            "${placemarks.first.name}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea}, ${placemarks.first.country}";
+
+        // Update the RideProvider's pickup with the obtained location details
+
+        // Update user location marker
+        setState(() {
+          // Remove old user location marker, if exists
+          _markers
+              .removeWhere((marker) => marker.markerId.value == 'userLocation');
+
+          // Add new user location marker
+          _markers.add(
+            Marker(
+              markerId: const MarkerId('userLocation'),
+              position: latLng,
+              icon: _userLocationIcon ?? BitmapDescriptor.defaultMarker,
+              infoWindow: InfoWindow(title: address),
+            ),
           );
+        });
 
-          // Add user's location marker with custom icon
-          setState(() {
-            _markers.add(
-              Marker(
-                markerId: const MarkerId('userLocation'),
-                position: latLng,
-                icon: _userLocationIcon ?? BitmapDescriptor.defaultMarker,
-                infoWindow: InfoWindow(title: address),
-              ),
-            );
-          });
-
-          // Move the camera to the user's location
-          _mapController?.animateCamera(CameraUpdate.newLatLng(latLng));
-        } else {
-          // If placemarks list is empty, show a fallback message
-          showSnackbar("Unable to retrieve address, please try again.",
-              Colors.red, context);
-        }
-      } catch (e) {
-        print("Failed to get address: $e");
-        showSnackbar("Failed to get address", Colors.red, context);
+        // Move the camera to the user's location
+        _mapController?.animateCamera(CameraUpdate.newLatLng(latLng));
+      } else {
+        // If placemarks list is empty, show a fallback message
+        showSnackbar("Unable to retrieve address, please try again.",
+            Colors.red, context);
       }
+    } catch (e) {
+      print("Failed to get address: $e");
+      showSnackbar("Failed to get address", Colors.red, context);
     }
   }
 
@@ -142,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        bottomSheet: DraggableBottomSheet(),
+        bottomSheet: const DraggableBottomSheet(),
         body: SafeArea(
           child: Stack(
             children: [
@@ -231,9 +296,52 @@ class _HomeScreenState extends State<HomeScreen> {
                           hintStyle: Theme.of(context).textTheme.bodyLarge,
                         ),
                         onTap: () => showGooglePlacesAutocomplete(context),
+                        // var chck =
+                        //     Provider.of<RideProvider>(context, listen: false)
+                        //         .pickup;
+                        // if (chck != null) {
+
+                        // } else {
+                        //   showDialog(
+                        //       context: context,
+                        //       builder: (ctx) => AlertDialog(
+                        //             content:
+                        //                 Text('Please select a CabHub first!'),
+                        //           ));
+                        // }
                       ),
                     )
-                  : const SizedBox.shrink(),
+                  : Align(
+                      alignment: Alignment.topRight,
+                      child: Container(
+                        // height: 40,
+                        // width: 40,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        margin: const EdgeInsets.all(8),
+                        // padding: const EdgeInsets.all(8),
+                        // alignment: Alignment.center,
+                        child: IconButton(
+                          icon: const Icon(Icons.my_location, size: 30),
+                          onPressed: () async {
+                            final position = await _determinePosition();
+                            if (position != null) {
+                              final latLng =
+                                  LatLng(position.latitude, position.longitude);
+                              Provider.of<LocationViewModel>(context,
+                                      listen: false)
+                                  .updateCurrentPosition(latLng);
+
+                              _mapController?.animateCamera(
+                                CameraUpdate.newLatLng(latLng),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ),
             ],
           ),
         ),
@@ -241,37 +349,61 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<List<LatLng>> getRoadDirections(
-      LatLng origin, LatLng destination) async {
-    const String apiKey =
-        "AIzaSyDlhLBOy0MZ10uITSTClB0SMneFG5Glrcg"; // Replace with your API key
-    final String url =
-        "https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&key=$apiKey";
-
+  Future<List<LatLng>> getRoadDirections(LatLng start, LatLng end) async {
     try {
+      final String url =
+          'https://maps.googleapis.com/maps/api/directions/json?origin=${start.latitude},${start.longitude}&destination=${end.latitude},${end.longitude}&key=AIzaSyDlhLBOy0MZ10uITSTClB0SMneFG5Glrcg';
+
       final response = await http.get(Uri.parse(url));
+
       if (response.statusCode == 200) {
-        final json = jsonDecode(response.body);
-        print("Directions API Response: ${response.body}");
+        final data = jsonDecode(response.body);
 
-        final points = json['routes'][0]['overview_polyline']['points'];
+        if (data['status'] == 'OK') {
+          final points = PolylinePoints()
+              .decodePolyline(data['routes'][0]['overview_polyline']['points']);
 
-        // Decode the polyline points
-        PolylinePoints polylinePoints = PolylinePoints();
-        final result = polylinePoints.decodePolyline(points);
-
-        // Convert to LatLng
-        return result
-            .map((point) => LatLng(point.latitude, point.longitude))
-            .toList();
+          return points
+              .map((point) => LatLng(point.latitude, point.longitude))
+              .toList();
+        } else {
+          throw Exception(
+              data['error_message'] ?? 'Failed to fetch directions');
+        }
       } else {
-        throw Exception("Failed to fetch directions");
+        throw Exception('HTTP Error: ${response.statusCode}');
       }
     } catch (e) {
-      print("Error fetching directions: $e");
-
-      return [];
+      print('Error fetching directions: $e');
+      rethrow;
     }
+  }
+
+  Future<void> _drawRouteBetweenPickupAndDestination() async {
+    final pickup = Provider.of<RideProvider>(context, listen: false).pickup;
+    final destination = Provider.of<RideProvider>(context, listen: false).dest;
+
+    if (pickup == null || destination == null) {
+      showSnackbar("Please select both pickup and destination points.",
+          Colors.red, context);
+      return;
+    }
+
+    // final List<LatLng> polylineCoordinates = await getRoadDirections(
+    //   LatLng(pickup.lat, pickup.lng),
+    //   LatLng(destination.lat, destination.lng),
+    // );
+
+    // setState(() {
+    //   _polylines.add(
+    //     Polyline(
+    //       polylineId: const PolylineId("route"),
+    //       color: Colors.blue,
+    //       width: 5,
+    //       points: polylineCoordinates,
+    //     ),
+    //   );
+    // });
   }
 
   void showGooglePlacesAutocomplete(BuildContext context) {
@@ -358,23 +490,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     )
                                   : null;
 
-                          if (pickupLatLng != null) {
-                            final routePoints =
-                                await getRoadDirections(pickupLatLng, latLng);
-
-                            print('routepoints: $routePoints');
-
-                            setState(() {
-                              _polylines.add(
-                                Polyline(
-                                  polylineId: const PolylineId('route'),
-                                  points: routePoints,
-                                  color: Colors.blue,
-                                  width: 5,
-                                ),
-                              );
-                            });
-                          }
+                          // Draw polyline
+                          await _drawRouteBetweenPickupAndDestination();
 
                           _mapController
                               ?.animateCamera(CameraUpdate.newLatLng(latLng));

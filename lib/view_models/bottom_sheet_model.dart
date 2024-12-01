@@ -21,10 +21,9 @@ class BottomSheetModel with ChangeNotifier {
       case 2:
         return Bottom3(
           width: width,
-         
         );
-      case 3:
-        return Bottom4(width: width);
+      // case 3:
+      //   return Bottom4(width: width);
       case 4:
         return bottom5();
     }

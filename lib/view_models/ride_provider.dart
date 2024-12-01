@@ -16,7 +16,7 @@ class RideProvider with ChangeNotifier {
   Place? get dest => _dest;
   String? get rideType => _rideType;
   String? get userId => _userId;
-  get rideRequest => _rideRequest;
+  RideRequest? get rideRequest => _rideRequest;
 
   set pickup(Place? value) {
     _pickup = value;
@@ -38,6 +38,7 @@ class RideProvider with ChangeNotifier {
     notifyListeners();
   }
 
+
   // Method to book a ride and upload it to Firestore
   Future<void> bookRide(BuildContext context) async {
     if (_pickup == null ||
@@ -56,15 +57,15 @@ class RideProvider with ChangeNotifier {
       rideType: _rideType!,
       userId: _userId!,
       timestamp: Timestamp.now(),
+      rideOtp: RideRequest.generateOtp(),
     );
     print('here2');
     try {
       // Upload ride request to Firestore
-
       final docRef = await FirebaseFirestore.instance
           .collection('rideRequests')
           .add(rideRequest.toMap());
-      print('here3');
+
       showSnackbar(
           "Ride request created with ID: ${docRef.id}", Colors.green, context);
 
@@ -75,5 +76,40 @@ class RideProvider with ChangeNotifier {
     } catch (e) {
       print("Failed to book ride: $e");
     }
+  }
+
+  // Method to cancel the ride and reset values to default
+  void cancelRide(BuildContext context) async {
+    if (_rideRequest != null && _rideRequest!.id.isNotEmpty) {
+      try {
+        // Update the ride request status in Firestore
+        await FirebaseFirestore.instance
+            .collection('rideRequests')
+            .doc(_rideRequest!.id)
+            .update({'status': 'cancelled'});
+
+        print("Ride status updated to cancelled in Firestore.");
+
+        // Show success snackbar
+        showSnackbar("Ride cancelled successfully.", Colors.green, context);
+      } catch (e) {
+        print("Failed to update ride status: $e");
+
+        // Show error snackbar
+        showSnackbar(
+            "Failed to cancel the ride. Try again.", Colors.red, context);
+      }
+    } else {
+      // Show snackbar for invalid cancel attempt
+      showSnackbar("No active ride to cancel.", Colors.orange, context);
+    }
+
+    // Reset local values to default
+    _pickup = null;
+    _dest = null;
+    _rideType = 'Mini'; // Default ride type
+    _rideRequest = null;
+
+    notifyListeners();
   }
 }

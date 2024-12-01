@@ -4,6 +4,7 @@ import 'package:chakracabs/views/main_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:new_pinput/new_pinput.dart';
 import 'package:provider/provider.dart';
 
@@ -100,6 +101,7 @@ class _PhoneVerifyScreenState extends State<PhoneVerifyScreen> {
           lastName: data['lastName'] ?? '',
           phoneNumber: data['fullPhoneNumber'] ?? '',
           email: data['email'] ?? '',
+          latLng: LatLng(0, 0),
         );
 
         // Update ProfileProvider

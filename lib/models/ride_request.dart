@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'place_model.dart';
 
@@ -10,6 +11,8 @@ class RideRequest {
   final String? driverId; // Nullable, assigned later
   final String status; // Can be 'requested', 'confirmed', 'cancelled'
   final Timestamp timestamp;
+  final String? hub; // Optional parameter for the hub
+  final int rideOtp; // 4-digit ride OTP
 
   RideRequest({
     required this.id,
@@ -20,6 +23,8 @@ class RideRequest {
     this.driverId,
     this.status = 'requested', // Default to 'requested'
     required this.timestamp,
+    this.hub, // Optional, can be null
+    required this.rideOtp, // Ride OTP is required
   });
 
   // Convert a RideRequest to a Firestore document
@@ -42,6 +47,8 @@ class RideRequest {
       'driverId': driverId,
       'status': status,
       'timestamp': timestamp,
+      'hub': hub, // Include hub in the map
+      'rideOtp': rideOtp, // Include rideOtp in the map
     };
   }
 
@@ -66,6 +73,14 @@ class RideRequest {
       driverId: map['driverId'],
       status: map['status'],
       timestamp: map['timestamp'],
+      hub: map['hub'], // Parse hub from the map, can be null
+      rideOtp: map['rideOtp'], // Parse rideOtp from the map
     );
+  }
+
+  // Generate a random 4-digit OTP
+  static int generateOtp() {
+    final random = Random();
+    return 1000 + random.nextInt(9000); // Random number between 1000 and 9999
   }
 }

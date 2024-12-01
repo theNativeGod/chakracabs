@@ -15,7 +15,7 @@ import 'package:provider/provider.dart';
 
 import 'view_models/map_view_model.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(MyApp());

@@ -23,7 +23,7 @@ class NearestCabHubs extends StatefulWidget {
 }
 
 class _NearestCabHubsState extends State<NearestCabHubs> {
-  int? selectedIndex;
+  int? selectedIndex = 0;
 
   final List<CabHub> cabhubs = [
     CabHub(

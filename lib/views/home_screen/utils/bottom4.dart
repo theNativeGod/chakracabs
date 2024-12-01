@@ -1,3 +1,4 @@
+import 'package:chakracabs/views/widgets/export.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -8,9 +9,19 @@ class Bottom4 extends StatelessWidget {
   const Bottom4({
     super.key,
     required this.width,
+    required this.driverName,
+    required this.car,
+    required this.carNumber,
+    required this.phoneNumber,
+    required this.otp,
   });
 
   final double width;
+  final String driverName;
+  final String car;
+  final String carNumber;
+  final String phoneNumber;
+  final String otp;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +37,7 @@ class Bottom4 extends StatelessWidget {
                 style: Theme.of(context)
                     .textTheme
                     .titleMedium!
-                    .copyWith(color: Colors.white),
+                    .copyWith(color: Colors.black),
               ),
               Container(
                 decoration: BoxDecoration(
@@ -72,7 +83,7 @@ class Bottom4 extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Anmol Roy',
+                            driverName,
                             style: TextStyle(
                               color: Theme.of(context).primaryColor,
                               fontWeight: FontWeight.w600,
@@ -86,36 +97,18 @@ class Bottom4 extends StatelessWidget {
                       child: Column(
                         children: [
                           const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              ...List.generate(
-                                  5,
-                                  (index) => Icon(
-                                        Icons.star,
-                                        size: 24,
-                                        shadows: const [
-                                          BoxShadow(
-                                            color: Colors.black,
-                                            offset: Offset(.5, .5),
-                                            spreadRadius: 1,
-                                          ),
-                                          BoxShadow(
-                                            color: Colors.black,
-                                            offset: Offset(-.5, -.5),
-                                            spreadRadius: 1,
-                                          ),
-                                        ],
-                                        color: index == 4
-                                            ? Colors.white
-                                            : Theme.of(context).primaryColor,
-                                      ))
-                            ],
+                          // RatingsWidget(),
+                          Text(
+                            'OTP: $otp',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4),
-                          const Text('WB 25985A6AS'),
+                          Text(carNumber),
                           const SizedBox(height: 8),
-                          const Text('Swift Dzire',
-                              style: TextStyle(color: Colors.grey)),
+                          Text(
+                            car,
+                            style: const TextStyle(color: Colors.grey),
+                          ),
                         ],
                       ),
                     ),
@@ -239,7 +232,7 @@ class Bottom4 extends StatelessWidget {
                               offset: const Offset(0, 2),
                               spreadRadius: 2,
                               blurRadius: 2,
-                            )
+                            ),
                           ],
                           borderRadius: BorderRadius.circular(8),
                           color: Theme.of(context).primaryColor),
@@ -248,15 +241,43 @@ class Bottom4 extends StatelessWidget {
                   ],
                 ),
               ),
-              FullPrimaryButton(
-                text: 'Cancel Ride',
-                ontap: () {
-                  Provider.of<BottomSheetModel>(context, listen: false)
-                      .selectedIndex = 4;
-                },
-              ),
+              CancelButton(),
               const SizedBox(height: 40),
             ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class RatingsWidget extends StatelessWidget {
+  const RatingsWidget({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        ...List.generate(
+          5,
+          (index) => Icon(
+            Icons.star,
+            size: 24,
+            shadows: const [
+              BoxShadow(
+                color: Colors.black,
+                offset: Offset(.5, .5),
+                spreadRadius: 1,
+              ),
+              BoxShadow(
+                color: Colors.black,
+                offset: Offset(-.5, -.5),
+                spreadRadius: 1,
+              ),
+            ],
+            color: index == 4 ? Colors.white : Theme.of(context).primaryColor,
           ),
         ),
       ],
