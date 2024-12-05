@@ -1,4 +1,4 @@
-package com.example.chakracabs
+package com.chakracabs.user
 
 import io.flutter.embedding.android.FlutterActivity
 

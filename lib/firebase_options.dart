@@ -41,46 +41,48 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCXOWdiZiRpMifV__GmFt3TEbmHDCFnCdc',
-    appId: '1:536327249347:web:9dc054b8315463b0737176',
-    messagingSenderId: '536327249347',
-    projectId: 'cakra-temp',
-    authDomain: 'cakra-temp.firebaseapp.com',
-    storageBucket: 'cakra-temp.firebasestorage.app',
+    apiKey: 'AIzaSyDZhpAwtj4x3qkF8E-ceRdJu37Q_sGhuz8',
+    appId: '1:262135090775:web:201141a1dad4a8b0eb9d12',
+    messagingSenderId: '262135090775',
+    projectId: 'chakra-cabs-439820',
+    authDomain: 'chakra-cabs-439820.firebaseapp.com',
+    storageBucket: 'chakra-cabs-439820.firebasestorage.app',
+    measurementId: 'G-39M82Z6SQC',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCQqsp0zYScI67d3-HApA9jrKwCNix3OOA',
-    appId: '1:536327249347:android:620d8485a778fd84737176',
-    messagingSenderId: '536327249347',
-    projectId: 'cakra-temp',
-    storageBucket: 'cakra-temp.firebasestorage.app',
+    apiKey: 'AIzaSyCKpcq2CQ3Qmj0LZwmb04YAzniKPQELRws',
+    appId: '1:262135090775:android:58c704818a8eba81eb9d12',
+    messagingSenderId: '262135090775',
+    projectId: 'chakra-cabs-439820',
+    storageBucket: 'chakra-cabs-439820.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCxxzfCmK8cTbTPPH_IzvU9hT58w_dgBpI',
-    appId: '1:536327249347:ios:3fa368cb51c6513a737176',
-    messagingSenderId: '536327249347',
-    projectId: 'cakra-temp',
-    storageBucket: 'cakra-temp.firebasestorage.app',
-    iosBundleId: 'com.example.chakracabs',
+    apiKey: 'AIzaSyAWW1p1MdZlodmlfHmeOXTGmycKJAXJg74',
+    appId: '1:262135090775:ios:464c96df614b1ca3eb9d12',
+    messagingSenderId: '262135090775',
+    projectId: 'chakra-cabs-439820',
+    storageBucket: 'chakra-cabs-439820.firebasestorage.app',
+    iosBundleId: 'com.chakracabs.user',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCxxzfCmK8cTbTPPH_IzvU9hT58w_dgBpI',
-    appId: '1:536327249347:ios:3fa368cb51c6513a737176',
-    messagingSenderId: '536327249347',
-    projectId: 'cakra-temp',
-    storageBucket: 'cakra-temp.firebasestorage.app',
-    iosBundleId: 'com.example.chakracabs',
+    apiKey: 'AIzaSyAWW1p1MdZlodmlfHmeOXTGmycKJAXJg74',
+    appId: '1:262135090775:ios:464c96df614b1ca3eb9d12',
+    messagingSenderId: '262135090775',
+    projectId: 'chakra-cabs-439820',
+    storageBucket: 'chakra-cabs-439820.firebasestorage.app',
+    iosBundleId: 'com.chakracabs.user',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCXOWdiZiRpMifV__GmFt3TEbmHDCFnCdc',
-    appId: '1:536327249347:web:2294adac904e2b47737176',
-    messagingSenderId: '536327249347',
-    projectId: 'cakra-temp',
-    authDomain: 'cakra-temp.firebaseapp.com',
-    storageBucket: 'cakra-temp.firebasestorage.app',
+    apiKey: 'AIzaSyDZhpAwtj4x3qkF8E-ceRdJu37Q_sGhuz8',
+    appId: '1:262135090775:web:7ed533b877f09e29eb9d12',
+    messagingSenderId: '262135090775',
+    projectId: 'chakra-cabs-439820',
+    authDomain: 'chakra-cabs-439820.firebaseapp.com',
+    storageBucket: 'chakra-cabs-439820.firebasestorage.app',
+    measurementId: 'G-XQ1SJMNRTP',
   );
 }

@@ -18,6 +18,7 @@ import 'view_models/map_view_model.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  
   runApp(MyApp());
 }
 
@@ -45,12 +46,13 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'Chakra Cabs',
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
           fontFamily: 'Inter',
           colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff94341a)),
           useMaterial3: true,
         ),
-        home: HomeScreen(),
+        home: SplashScreen(),
       ),
     );
   }

@@ -270,7 +270,7 @@ class _LoginScreenState extends State<LoginScreen> {
           .collection('users')
           .where('fullPhoneNumber', isEqualTo: fullPhoneNumber)
           .get();
-  
+
       if (querySnapshot.docs.isNotEmpty) {
         // User found, navigate to HomeScreen with user data
         var userData = querySnapshot.docs[0].data();
@@ -296,59 +296,61 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void openSignupBottomSheet() {
-    showModalBottomSheet(
+    showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: signupFormKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: firstNameController,
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'First name cannot be empty';
-                    }
-                    return null;
-                  },
-                  decoration: InputDecoration(labelText: 'First Name'),
-                ),
-                TextFormField(
-                  controller: lastNameController,
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Last name cannot be empty';
-                    }
-                    return null;
-                  },
-                  decoration: InputDecoration(labelText: 'Last Name'),
-                ),
-                TextFormField(
-                  controller: emailController,
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Email cannot be empty';
-                    }
-                    return null;
-                  },
-                  decoration: InputDecoration(labelText: 'Email'),
-                ),
-                SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (signupFormKey.currentState!.validate()) {
-                      await signUpUser();
-                      Navigator.pop(context);
-                      showSnackbar("User signed up successfully!", Colors.green,
-                          context);
-                    }
-                  },
-                  child: Text('Sign Up'),
-                ),
-              ],
+        return AlertDialog(
+          content: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: signupFormKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: firstNameController,
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'First name cannot be empty';
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(labelText: 'First Name'),
+                  ),
+                  TextFormField(
+                    controller: lastNameController,
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Last name cannot be empty';
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(labelText: 'Last Name'),
+                  ),
+                  TextFormField(
+                    controller: emailController,
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Email cannot be empty';
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(labelText: 'Email'),
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (signupFormKey.currentState!.validate()) {
+                        await signUpUser();
+                        Navigator.pop(context);
+                        showSnackbar("User signed up successfully!",
+                            Colors.green, context);
+                      }
+                    },
+                    child: Text('Sign Up'),
+                  ),
+                ],
+              ),
             ),
           ),
         );
